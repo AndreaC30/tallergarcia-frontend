@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom"; // Añadir esta importación
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +20,7 @@ export default function Login() {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          username: email,
+          username: email, // FastAPI espera `username` en login
           password: password,
         }),
       });
@@ -31,7 +32,10 @@ export default function Login() {
       }
 
       localStorage.setItem("token", data.access_token);
-      alert("✅ Login exitoso. Token guardado.");
+      localStorage.setItem("email", email);
+
+      // ✅ Redirigir al dashboard o inicio
+      navigate("/dashboard"); // Cambia esta ruta si es diferente
     } catch (err) {
       setError(err.message);
     } finally {

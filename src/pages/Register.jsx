@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Link } from "react-router-dom"; // Añadir esta importación
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [form, setForm] = useState({
-    username: "",
+    full_name: "", // ✅ cambiamos username → full_name
     email: "",
     password: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -18,6 +19,16 @@ export default function Register() {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    // ✅ Validaciones básicas
+    if (!form.email.includes("@")) {
+      setError("Por favor introduce un correo válido.");
+      return;
+    }
+    if (form.password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
 
     try {
       const response = await fetch("http://127.0.0.1:8000/register", {
@@ -34,8 +45,11 @@ export default function Register() {
         throw new Error(data.detail || "Error al registrar usuario");
       }
 
-      setSuccess("✅ Registro exitoso. Ahora puedes iniciar sesión.");
-      setForm({ username: "", email: "", password: "" });
+      setSuccess("✅ Registro exitoso. Redirigiendo al login...");
+      setForm({ full_name: "", email: "", password: "" });
+
+      // ✅ Redirigir a login tras 2 segundos
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       setError(err.message);
     }
@@ -51,12 +65,12 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Nombre de usuario
+              Nombre completo
             </label>
             <input
               type="text"
-              name="username"
-              value={form.username}
+              name="full_name" // ✅ cambiamos el name
+              value={form.full_name}
               onChange={handleChange}
               required
               className="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300"
